@@ -45,17 +45,14 @@ router.get("/", (_, res) => {
 router.get("/:id", (req, res) => {
   fs.readFile(global.fileName, "utf8", (err, data) => {
     try {
-      if (!err) {
-        let json = JSON.parse(data);
-        let account = json.accounts.find((account => account.id === parseInt(req.params.id, 10)));
-        
-        if (account) {
-          res.send(account);
-        } else {
-          res.end();
-        }
+      if (err) throw err;
+      
+      let json = JSON.parse(data);
+      const account = json.accounts.find(account => account.id === parseInt(req.params.id, 10));
+      if (account) {
+        res.send(account);
       } else {
-        res.status(400).send({ error: err.message });
+        res.end();
       }
     } catch (err) {
       res.status(400).send({ error: err.message });
@@ -63,5 +60,26 @@ router.get("/:id", (req, res) => {
   });
 });
 
+router.delete("/:id", (req, res) => {
+  fs.readFile(global.fileName, "utf8", (err, data) => {
+    try {
+      if (err) throw err;
+
+      let json = JSON.parse(data);
+      let accounts = json.accounts.filter(account => account.id != parseInt(req.params.id, 10));
+      json.accounts = accounts;
+
+      fs.writeFile("accounts.json", JSON.stringify(json), err=> {
+        if (err) {
+          res.status(400).send({ error: err.message });
+        } else {
+          res.end();
+        }
+      });
+    } catch (err) {
+
+    }
+  });
+});
 
 module.exports = router;

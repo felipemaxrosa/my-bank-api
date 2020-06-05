@@ -1,5 +1,5 @@
 const express = require('express');
-const fs = require('fs');
+const fs = require('fs').promises;
 const app = express();
 const accountsRouter = require("./routes/accounts");
 
@@ -9,26 +9,17 @@ app.use("/account", accountsRouter);
 const port = 3000;
 global.fileName = "accounts.json";
 
-app.listen(port, () => {
+app.listen(port, async () => {
   try {
-    fs.readFile(global.fileName, "utf8", (err, data) => {
-      if(err) {
-        const initialJson = {
-          nextId: 1,
-          accounts: []
-        };
-        fs.writeFile("accounts.json", JSON.stringify(initialJson), err => {
-          if(err) {
-            console.log(err);
-          }
-        });
-      }
-
-    });
+    await fs.readFile(global.fileName, "utf8");
+    console.log('API started!');
   } catch (err) {
+    const initialJson = {
+      nextId: 1,
+      accounts: []
+    };
+
+    await fs.writeFile("accounts.json", JSON.stringify(initialJson));
     res.status(400).send({ error: err.message });
   }
-
-
-  console.log('API started!');
 });

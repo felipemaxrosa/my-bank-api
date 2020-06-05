@@ -77,7 +77,73 @@ router.delete("/:id", (req, res) => {
         }
       });
     } catch (err) {
+      res.status(400).send({ error: err.message });
+    }
+  });
+});
 
+// PUT - atualizar o registro completo
+// PATCH - atualizar o registro parcialmente, somente alguns, campos
+
+router.put("/", (req, res) => {
+  let newAccount = req.body;
+  
+  fs.readFile("accounts.json", "utf-8", (err, data) => {
+    try {
+      if(err) throw err;
+
+      let json = JSON.parse(data);
+      let indexAccount = json.accounts.findIndex(account => account.id === newAccount.id);
+      json.accounts[indexAccount].name = newAccount.name;
+      json.accounts[indexAccount].balance = newAccount.balance;
+
+      fs.writeFile("accounts.json", JSON.stringify(json), err=> {
+        if (err) {
+          res.status(400).send({ error: err.message });
+        } else {
+          res.end();
+        }
+      });
+      fs.writeFile("accounts.json", JSON.stringify(json), err=> {
+        if (err) {
+          res.status(400).send({ error: err.message });
+        } else {
+          res.end();
+        }
+      });  
+    } catch (err) {
+      res.status(400).send({ error: err.message });
+    }
+  });
+});
+
+router.post("/deposit", (req, res) => {
+  let params = req.body;
+  
+  fs.readFile("accounts.json", "utf-8", (err, data) => {
+    try {
+      if(err) throw err;
+
+      let json = JSON.parse(data);
+      let index = json.accounts.findIndex(account => account.id === params.id);
+      json.accounts[index].balance += params.value;
+
+      fs.writeFile("accounts.json", JSON.stringify(json), err=> {
+        if (err) {
+          res.status(400).send({ error: err.message });
+        } else {
+          res.end(JSON.stringify(json.accounts[index].balance));
+        }
+      });
+      fs.writeFile("accounts.json", JSON.stringify(json), err=> {
+        if (err) {
+          res.status(400).send({ error: err.message });
+        } else {
+          res.end();
+        }
+      });  
+    } catch (err) {
+      res.status(400).send({ error: err.message });
     }
   });
 });

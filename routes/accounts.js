@@ -117,7 +117,7 @@ router.put("/", (req, res) => {
   });
 });
 
-router.post("/deposit", (req, res) => {
+router.post("/transaction", (req, res) => {
   let params = req.body;
   
   fs.readFile("accounts.json", "utf-8", (err, data) => {
@@ -126,22 +126,21 @@ router.post("/deposit", (req, res) => {
 
       let json = JSON.parse(data);
       let index = json.accounts.findIndex(account => account.id === params.id);
+      let newBalance = json.accounts[index].balance + params.value;
+
+      if (newBalance < 0) {
+        throw new Error("Saldo insuficiente!");
+      }
+
       json.accounts[index].balance += params.value;
 
       fs.writeFile("accounts.json", JSON.stringify(json), err=> {
         if (err) {
           res.status(400).send({ error: err.message });
         } else {
-          res.end(JSON.stringify(json.accounts[index].balance));
+          res.send(json.accounts[index]);
         }
       });
-      fs.writeFile("accounts.json", JSON.stringify(json), err=> {
-        if (err) {
-          res.status(400).send({ error: err.message });
-        } else {
-          res.end();
-        }
-      });  
     } catch (err) {
       res.status(400).send({ error: err.message });
     }

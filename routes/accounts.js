@@ -1,5 +1,6 @@
 import express from 'express';
 import { promises } from "fs";
+import cors from "cors";
 
 const router = express.Router();
 
@@ -25,7 +26,7 @@ router.post("/", async (req, res) => {
   }    
 });
 
-router.get("/", async (_, res) => {
+router.get("/", cors(), async (_, res) => {
   try {
     let data = await readFile(global.fileName, "utf8");
     let accounts = JSON.parse(data);

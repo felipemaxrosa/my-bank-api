@@ -1,17 +1,20 @@
-const express = require('express');
-const router = express.Router();
-const fs = require("fs").promises;
+import express from 'express';
+import { promises } from "fs";
 
+const router = express.Router();
+
+const readFile = promises.readFile;
+const writeFile = promises.writeFile;
 
 router.post("/", async (req, res) => {
   let account = req.body;
   try {
-    let data = await fs.readFile("accounts.json", "utf8");
+    let data = await readFile("accounts.json", "utf8");
     let json = JSON.parse(data);
     account = { id: json.nextId++, ...account };
     json.accounts.push(account);
 
-    await fs.writeFile("accounts.json", JSON.stringify(json));
+    await writeFile("accounts.json", JSON.stringify(json));
     res.end();
     
     logger.info(`POST /account - ${JSON.stringify(account)}`);
@@ -24,7 +27,7 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (_, res) => {
   try {
-    let data = await fs.readFile(global.fileName, "utf8");
+    let data = await readFile(global.fileName, "utf8");
     let accounts = JSON.parse(data);
     delete accounts.nextId;
     res.send(accounts);
@@ -37,7 +40,7 @@ router.get("/", async (_, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    let data = await fs.readFile(global.fileName, "utf8");
+    let data = await readFile(global.fileName, "utf8");
     let json = JSON.parse(data);
     const account = json.accounts.find(account => account.id === parseInt(req.params.id, 10));
     if (account) {
@@ -54,12 +57,12 @@ router.get("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    let data = await fs.readFile(global.fileName, "utf8");
+    let data = await readFile(global.fileName, "utf8");
     let json = JSON.parse(data);
     let accounts = json.accounts.filter(account => account.id != parseInt(req.params.id, 10));
     json.accounts = accounts;
 
-    await fs.writeFile("accounts.json", JSON.stringify(json));
+    await writeFile("accounts.json", JSON.stringify(json));
     res.end();
     
     logger.info(`DELETE /account/:id - ${req.params.id} - successfully`);
@@ -77,14 +80,14 @@ router.put("/", async (req, res) => {
   let newAccount = req.body;
   
   try {
-    let data = await fs.readFile("accounts.json", "utf-8");
+    let data = await readFile("accounts.json", "utf-8");
 
     let json = JSON.parse(data);
     let indexAccount = json.accounts.findIndex(account => account.id === newAccount.id);
     json.accounts[indexAccount].name = newAccount.name;
     json.accounts[indexAccount].balance = newAccount.balance;
 
-    await fs.writeFile("accounts.json", JSON.stringify(json));
+    await writeFile("accounts.json", JSON.stringify(json));
 
     res.end();
     logger.info(`PUT /account - ${JSON.stringify(newAccount)}`);
@@ -98,7 +101,7 @@ router.post("/transaction", async (req, res) => {
   
   try {
     let params = req.body;
-    let data = await fs.readFile("accounts.json", "utf-8");
+    let data = await readFile("accounts.json", "utf-8");
 
     let json = JSON.parse(data);
     let index = json.accounts.findIndex(account => account.id === params.id);
@@ -109,7 +112,7 @@ router.post("/transaction", async (req, res) => {
     }
     json.accounts[index].balance += params.value;
 
-    await fs.writeFile("accounts.json", JSON.stringify(json));
+    await writeFile("accounts.json", JSON.stringify(json));
     res.send(json.accounts[index]);
     logger.info(`POST /account/transaction - ${JSON.stringify(params)}`);
   } catch (err) {
@@ -119,4 +122,4 @@ router.post("/transaction", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

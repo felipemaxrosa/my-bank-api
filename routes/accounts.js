@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require("fs").promises;
 
+
 router.post("/", async (req, res) => {
   let account = req.body;
   try {
@@ -12,9 +13,12 @@ router.post("/", async (req, res) => {
 
     await fs.writeFile("accounts.json", JSON.stringify(json));
     res.end();
+    
+    logger.info(`POST /account - ${JSON.stringify(account)}`);
 
   } catch (err) {
     res.status(400).send({ error: err.message });
+    logger.error(`POST /account - ${err.message}`);
   }    
 });
 
@@ -24,8 +28,10 @@ router.get("/", async (_, res) => {
     let accounts = JSON.parse(data);
     delete accounts.nextId;
     res.send(accounts);
+    logger.info("GET /account - successfully");
   } catch (err) {
     res.status(400).send({ error: err.message });
+    logger.error(`GET /account - ${err.message}`);
   }
 });
 
@@ -36,11 +42,13 @@ router.get("/:id", async (req, res) => {
     const account = json.accounts.find(account => account.id === parseInt(req.params.id, 10));
     if (account) {
       res.send(account);
+      logger.info(`GET /account/:id - ${JSON.stringify(account)}`);
     } else {
       res.end();
     }
   } catch (err) {
     res.status(400).send({ error: err.message });
+    logger.error(`GET /account/:id - ${err.message}`);
   }
 });
 
@@ -52,8 +60,13 @@ router.delete("/:id", async (req, res) => {
     json.accounts = accounts;
 
     await fs.writeFile("accounts.json", JSON.stringify(json));
+    res.end();
+    
+    logger.info(`DELETE /account/:id - ${req.params.id} - successfully`);
+
   } catch (err) {
     res.status(400).send({ error: err.message });
+    logger.error(`DELETE /account/:id - id: ${req.body.id} - error: ${err.message}`);
   }
 });
 
@@ -74,8 +87,10 @@ router.put("/", async (req, res) => {
     await fs.writeFile("accounts.json", JSON.stringify(json));
 
     res.end();
+    logger.info(`PUT /account - ${JSON.stringify(newAccount)}`);
   } catch (err) {
     res.status(400).send({ error: err.message });
+    logger.error(`PUT /account - id: ${req.params.id} - error: ${err.message}`);
   }
 });
 
@@ -96,8 +111,11 @@ router.post("/transaction", async (req, res) => {
 
     await fs.writeFile("accounts.json", JSON.stringify(json));
     res.send(json.accounts[index]);
+    logger.info(`POST /account/transaction - ${JSON.stringify(params)}`);
   } catch (err) {
     res.status(400).send({ error: err.message });
+    logger.error(`POST /account/transaction - id: ${req.params.id} - error: ${err.message}`);
+
   }
 });
 

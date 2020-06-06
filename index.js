@@ -1,6 +1,8 @@
 import express from 'express';
 import { promises } from 'fs';
 import winston from 'winston';
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./doc.js";
 
 import accountsRouter from "./routes/accounts.js";
 
@@ -30,6 +32,7 @@ global.logger = winston.createLogger({
 
 app.use(express.json());
 app.use("/account", accountsRouter);
+app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const port = 3000;
 
